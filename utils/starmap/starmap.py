@@ -89,7 +89,10 @@ def mapdata(ssystems, assets):
 		#assets = ssys.assets
 		sysinhabited[ssys.name] = False
 		for asset in ssys.assets:
-			result = set(assetInstance for assetInstance in assets if assetInstance.name==asset)
+			result = {
+			    assetInstance
+			    for assetInstance in assets if assetInstance.name == asset
+			}
 			#sys.stderr.write("\t\t\t" + asset + " : " + str(len(result)) + "\n")
 			for assetInstance in result:
 				pass
@@ -109,8 +112,8 @@ def mapdata(ssystems, assets):
 
 		# Note down any jumps it has. Ignore any that can't be entered from
 		# here; they'll be recorded in the system at the other end.
-		jumps_by_name[ssys.name] = list(dest for dest in ssys.jumps
-										if not ssys.jumps[dest].exit_only)
+		jumps_by_name[ssys.name] = [dest for dest in ssys.jumps
+												if not ssys.jumps[dest].exit_only]
 		# Track the outermost systems.
 		xmin = min(xmin, ssys.pos.x)
 		xmax = max(xmax, ssys.pos.x)
@@ -118,8 +121,8 @@ def mapdata(ssystems, assets):
 		ymax = max(ymax, ssys.pos.y)
 
 	# Convert the jump data to a series of coordinates.
-	for origin in jumps_by_name:
-		for dest in jumps_by_name[origin]:
+	for origin, value in jumps_by_name.items():
+		for dest in value:
 			if dest in jumps_by_name and origin in jumps_by_name[dest]:
 				# Two-way jump.
 				jumps.append((syslocs[origin], syslocs[dest]))
@@ -225,27 +228,22 @@ def makemap(ssystems, assets, margin=100, sys_size=5, inhabited_sys_size=15, ssy
 			print('		<g>',file=file)
 			print('			<circle class="inhabited" cx="{}" cy="{}" r="{}"/>'.format(x, -y, inhabited_sys_size),
 				  file=file)
-			print('		</g>',file=file)
+		elif sysassets[name]:
+			# Uninhabited system has non-asteroids assets
+			print('		<g>',file=file)
+			print('			<circle class="assets" cx="{}" cy="{}" r="{}"/>'.format(x, -y, (sys_size+inhabited_sys_size)/2),
+				  file=file)
+		elif sysasteroids[name]:
+			# Uninhabited system has only asteroids assets
+			print('		<g>',file=file)
+			print('			<circle class="asteroids" cx="{}" cy="{}" r="{}"/>'.format(x, -y, (sys_size+inhabited_sys_size)/2),
+				  file=file)
 		else:
-			if sysassets[name]:
-				# Uninhabited system has non-asteroids assets
-				print('		<g>',file=file)
-				print('			<circle class="assets" cx="{}" cy="{}" r="{}"/>'.format(x, -y, (sys_size+inhabited_sys_size)/2),
-					  file=file)
-				print('		</g>',file=file)
-			else:
-				if sysasteroids[name]:
-					# Uninhabited system has only asteroids assets
-					print('		<g>',file=file)
-					print('			<circle class="asteroids" cx="{}" cy="{}" r="{}"/>'.format(x, -y, (sys_size+inhabited_sys_size)/2),
-						  file=file)
-					print('		</g>',file=file)
-				else:
-					# System has no assets at all
-					print('		<g>',file=file)
-					print('			<circle cx="{}" cy="{}" r="{}"/>'.format(x, -y, sys_size),
-						  file=file)
-					print('		</g>',file=file)
+			# System has no assets at all
+			print('		<g>',file=file)
+			print('			<circle cx="{}" cy="{}" r="{}"/>'.format(x, -y, sys_size),
+				  file=file)
+		print('		</g>',file=file)
 	print('	</g>', file=file)
 	print(file=file)
 
@@ -261,26 +259,23 @@ def makemap(ssystems, assets, margin=100, sys_size=5, inhabited_sys_size=15, ssy
 																2 * inhabited_sys_size,
 															  name),
 				file=file)
-			print('		</g>',file=file)
+		elif (sysassets[name] or sysasteroids[name]):
+			# Uninhabited system has assets
+			print('		<g>',file=file)
+			print('			<text x="{}" y="{}" font-size="{}">{}</text>'.format(x + 2 * sys_size,
+															  -y + sys_size,
+															  4 * sys_size,
+															  name),
+				file=file)
 		else:
-			if (sysassets[name] or sysasteroids[name]):
-				# Uninhabited system has assets
-				print('		<g>',file=file)
-				print('			<text x="{}" y="{}" font-size="{}">{}</text>'.format(x + 2 * sys_size,
-																  -y + sys_size,
-																  4 * sys_size,
-																  name),
-					file=file)
-				print('		</g>',file=file)
-			else:
-				# System has no assets at all
-				print('		<g>',file=file)
-				print('			<text x="{}" y="{}" font-size="{}">{}</text>'.format(x + 2 * sys_size,
-																  -y + sys_size,
-																  3 * sys_size,
-																  name),
-					file=file)
-				print('		</g>',file=file)
+			# System has no assets at all
+			print('		<g>',file=file)
+			print('			<text x="{}" y="{}" font-size="{}">{}</text>'.format(x + 2 * sys_size,
+															  -y + sys_size,
+															  3 * sys_size,
+															  name),
+				file=file)
+		print('		</g>',file=file)
 	print('	</g>', file=file)
 	print(file=file)
 

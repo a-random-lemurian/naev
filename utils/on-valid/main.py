@@ -36,7 +36,7 @@ class sanitizer:
         Initialize the whole parser : create a list of lua files.
         """
         self.config = args
-        self.luaScripts = list()
+        self.luaScripts = []
 
         if 'datpath' not in self.config.keys():
             self.config['datpath'] = os.path.join(self.config['basepath'],
@@ -116,21 +116,21 @@ class sanitizer:
 
         search_cobj = re.compile(rawstr, re.VERBOSE| re.UNICODE)
 
-        entry = dict()
-        errors = list()
+        entry = {}
+        errors = []
 
         # XXX This variable will stock all the lua files. This could lead to a
         # massive memory consumption.
-        line = dict()
+        line = {}
 
         print("Basic check now ...")
         for file in self.luaScripts:
             if self.config['verbose']:
                 print("Processing file {0}...".format(file), end='       ')
-            if len(errors) > 0:
+            if errors:
                 for error in errors:
                     print(error, file=sys.stderr)
-                errors = list()
+                errors = []
 
             try:
                 line[file] = open(file, 'rU').read()
@@ -145,21 +145,26 @@ class sanitizer:
                             file=file
                     )
 
-                    if info['func'] == 'scom.addPilot':
-                        if not shipdata.find(info['content']):
-                            haserror=True
-                    if info['func'] == 'pilot.add':
-                        if not shipdata.find(info['content']):
-                            haserror=True
-                    if info['func'] == 'outfitAdd':
-                        if not outfitdata.find(info['content']):
-                            haserror=True
-                    if info['func'] == 'player.addShip':
-                        if not shipdata.find(info['content']):
-                            haserror=True
-                    if info['func'] == 'diff.apply':
-                        if not udata.find(info['content']):
-                            haserror=True
+                    if info['func'] == 'scom.addPilot' and not shipdata.find(
+                        info['content']
+                    ):
+                        haserror=True
+                    if info['func'] == 'pilot.add' and not shipdata.find(
+                        info['content']
+                    ):
+                        haserror=True
+                    if info['func'] == 'outfitAdd' and not outfitdata.find(
+                        info['content']
+                    ):
+                        haserror=True
+                    if info['func'] == 'player.addShip' and not shipdata.find(
+                        info['content']
+                    ):
+                        haserror=True
+                    if info['func'] == 'diff.apply' and not udata.find(
+                        info['content']
+                    ):
+                        haserror=True
 
                     if haserror:
                         errors.append(self._errorstring % info)
@@ -174,33 +179,32 @@ class sanitizer:
                 print("DONE")
 
         print('Verifying ...')
-        unused_data = dict()
+        unused_data = {}
 
         # makes sure that only category with unused stuff get listed
         tocheck = ((udata,'unidiff'), (shipdata, 'ship'), (outfitdata, 'outfit'))
         for obj, key in tocheck:
             tmp = obj.get_unused()
             if len(tmp) > 0:
-                unused_data.update({key: tmp})
+                unused_data[key] = tmp
         del(tmp)
 
-        if len(unused_data) > 0:
+        if unused_data:
            # Create the regex
-            mcobj = dict()
+            mcobj = {}
             for (category, data) in unused_data.items():
                 regex = r"""
                 (?P<{0}>%s)
                 """.format(category)
                 rname = ''
-                uniqList = list()
+                uniqList = []
                 for name in data:
                     name = name.replace(' ', "\s")
                     rname = rname + name + '|'
                     if name not in uniqList:
                         uniqList.append(name)
                 regex = regex % rname[:-1]
-                mcobj.update({category: re.compile(regex, re.VERBOSE| re.UNICODE)})
-
+                mcobj[category] = re.compile(regex, re.VERBOSE| re.UNICODE)
             # For each file, run each regex
             # If an item is found, that item is set to the unknown status
             for (file, content) in line.items():

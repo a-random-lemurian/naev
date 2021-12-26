@@ -46,19 +46,11 @@ def inSysStiff( nodess, factass, g2ass, loc2globNs ):
             xn, yn = nodes[n]
 
             na = g2ass[loc2globN[n]]  # Find global asset numerotation of local node
-            if na>=0:
-                fn = factass[na]
-            else: # It's not an asset
-                fn = -1
-
+            fn = factass[na] if na>=0 else -1
             for m in range(n): # Only m<n, because symmetry
                 xm, ym = nodes[m]
                 ma = g2ass[loc2globN[m]]
-                if ma>=0:
-                    fm = factass[ma]
-                else: # It's not an asset
-                    fm = -1
-
+                fm = factass[ma] if ma>=0 else -1
                 lmn = math.hypot( xn-xm, yn-ym )
 
                 # Check if very close path exist already.
@@ -165,10 +157,9 @@ def buildStiffness( problem, activated, systems ):
         sjj.append(i)
         svv.append(mu)
 
-    stiff = sp.csc_matrix( ( svv, (sii, sjj) ) )
     # Rem : it may become mandatory at some point to impose nb of dofs
 
-    return stiff
+    return sp.csc_matrix( ( svv, (sii, sjj) ) )
 
 @timed
 def compute_PPts_QtQ( problem, utilde, systems ):
@@ -260,7 +251,7 @@ def getGradient( problem, u, lamt, PPl, pres_0, activated, systems, iters_done )
                 continue
 
             loc2glob = systems.loc2globs[i] # Idices of the assets in the global numerotation
-            myDofs = myDofs + loc2glob
+            myDofs += loc2glob
 
 
         lal = np.zeros(lamt.shape)
@@ -316,7 +307,7 @@ def activateBestFact( problem, gl, activated, Lfaction, pres_c, pres_0, iters_do
         for ff in range(nfact):
             f = sind[ff]
 
-            for lane in range(FACTIONS_LANES_BUILT_PER_ITERATION):
+            for _ in range(FACTIONS_LANES_BUILT_PER_ITERATION):
                 if pres_c[i][f] <= 0.: # This faction has no presence
                     continue
 

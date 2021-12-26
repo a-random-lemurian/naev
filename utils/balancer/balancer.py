@@ -61,7 +61,7 @@ class Balancer:
                     for i in range(1,len(tags)):
                         root.remove( tags[i] )
                 tag = root.find(key)
-                if tag==None:
+                if tag is None:
                     # have to add new tag
                     new_tag = ET.SubElement(root,key)
                     new_tag.text = val
@@ -119,11 +119,7 @@ if __name__ == '__main__':
     parser.add_argument('filename', type=str, help="CSV file to either read from or write to.")
     args = parser.parse_args()
 
-    if args.mode=='outfit':
-        balancer = OutfitBalancer()
-    else:
-        balancer = ShipBalancer()
-
+    balancer = OutfitBalancer() if args.mode=='outfit' else ShipBalancer()
     if args.readwrite=='w':
         print( 'Writing to XML files from %s!' % args.filename )
         balancer.csv2xml( args.filename )

@@ -31,7 +31,7 @@ class ssys(readers):
         readers.__init__(self, datPath, 'ssys', verbose)
 
         tmp = self.xmlData.findall('ssys')
-        self.jumpsList = dict()
+        self.jumpsList = {}
         self.assetsList = dict()
         for system in tmp:
             ssysName = system.get('name')
@@ -77,7 +77,7 @@ class assets(readers):
         self.assets = dict()
 
         for asset in tmp:
-            self.assets.update({asset.get('name'): dict()})
+            self.assets[asset.get('name')] = {}
             # There are not always all tags, so filter !
             #tags = [self.tagAllowed(child.tag) for child in asset]
             for item in asset.iter():
@@ -107,17 +107,15 @@ class assets(readers):
         return self.assets[planetName]
 
     def getPopulationGreaterThan(self, population):
-        myList = list()
-        for (planetName, details) in self.assets:
-            if population > int(details['population']):
-                myList.append(planetName)
-
-        return myList
+        return [
+            planetName
+            for (planetName, details) in self.assets
+            if population > int(details['population'])
+        ]
 
     def getPlanetByClass(self, planetClass):
-        myList = list()
-        for (planetName, details) in self.assets:
-            if details['class'] == planetClass:
-                myList.append(planetName)
-
-        return myList
+        return [
+            planetName
+            for (planetName, details) in self.assets
+            if details['class'] == planetClass
+        ]

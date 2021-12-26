@@ -12,12 +12,12 @@ class ship(readers):
         self._componentName = 'ship'
         self._tech = config['tech']
         self.used = list()
-        self.unknown = list()
+        self.unknown = []
 
-        self.nameList = list()
-        self.missingTech = list()
+        self.nameList = []
+        self.missingTech = []
         self.missingLua = list()
-        self.missionInTech = list()
+        self.missionInTech = []
         print('Compiling ship list ...',end='       ')
         try:
             for ship in self.xmlData:
@@ -42,14 +42,13 @@ class ship(readers):
         self.missingLua.sort()
 
     def find(self, name):
-        if name in self.nameList:
-            if name in self.missingLua:
-                self.missingLua.remove(name)
-            if name not in self.used:
-                self.used.append(name)
-            return True
-        else:
+        if name not in self.nameList:
             return False
+        if name in self.missingLua:
+            self.missingLua.remove(name)
+        if name not in self.used:
+            self.used.append(name)
+        return True
 
     def showMissingTech(self):
         if len(self.missingTech) > 0 or len(self.missingLua) > 0:

@@ -13,11 +13,11 @@ class outfit(readers):
         self._componentName = 'outfit'
         self._tech = config['tech']
 
-        self.used = list()
+        self.used = []
         self.unknown = list()
 
-        self.nameList = list()
-        self.missingTech = list()
+        self.nameList = []
+        self.missingTech = []
         print('Compiling outfit list ...',end='     ')
         for outfit in self.xmlData:
             outfit = outfit.getroot()
@@ -30,14 +30,13 @@ class outfit(readers):
         print("DONE")
 
     def find(self, name):
-        if name in self.nameList:
-            if name in self.missingTech:
-                self.missingTech.remove(name)
-            if name not in self.used:
-                self.used.append(name)
-            return True
-        else:
+        if name not in self.nameList:
             return False
+        if name in self.missingTech:
+            self.missingTech.remove(name)
+        if name not in self.used:
+            self.used.append(name)
+        return True
 
     def showMissingTech(self):
         if len(self.missingTech) > 0:

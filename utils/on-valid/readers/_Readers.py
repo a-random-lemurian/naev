@@ -26,13 +26,13 @@ class readers:
         The file must be valid.
         """
         self._verbose=verbose
-        self.nameList=list()
+        self.nameList = []
 
         if self.xmlData is None:
             if type(xmlFiles) is not type(list()):
                 self.xmlData = ET.parse(xmlFiles)
                 return
-            self.xmlData = list()
+            self.xmlData = []
             for xfile in xmlFiles:
                 self.xmlData.append(ET.parse( xfile ))
 
@@ -78,13 +78,14 @@ class readers:
         Meaning it is probably used by a lua script, but this tool can't be
         certain (i.e. name used in a variable).
         """
-        if name in self.nameList and name not in self.used:
-            if name not in self.unknown:
-                self.v("SET ''%s`` as UNKNOWN" % name)
-                self.unknown.append(name)
+        if (
+            name in self.nameList
+            and name not in self.used
+            and name not in self.unknown
+        ):
+            self.v("SET ''%s`` as UNKNOWN" % name)
+            self.unknown.append(name)
 
     def v(self, msg):
         if self._verbose:
             print(msg)
-        else:
-            pass

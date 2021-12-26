@@ -16,10 +16,7 @@ images  = glob(prefix+"/dat/gfx/outfit/store/*")
 images += glob(prefix+"/artwork/gfx/outfit/store/*")
 images  = list(map( lambda x: os.path.basename(x), images ))
 
-imgdict = {}
-for i in images:
-    imgdict[i] = [0, []]
-
+imgdict = {i: [0, []] for i in images}
 for file in glob(prefix+"/dat/outfits/**/*.xml", recursive=True):
     print( file )
     with open( file, 'r' ) as f:

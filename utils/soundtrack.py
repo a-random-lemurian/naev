@@ -80,10 +80,10 @@ def generate_soundtrack( source_dir, output, generate_csv=False ):
         if generate_csv:
             csvfile.close()
 
-    if len(all_songs) > 0:
+    if all_songs:
         print( 'MISSING SONGS:' )
         print( all_songs )
-    if len(duplicated_songs) > 0:
+    if duplicated_songs:
         print( 'DUPLICATED SONGS:' )
         print( duplicated_songs )
 
@@ -96,15 +96,14 @@ if __name__=="__main__":
     args = parser.parse_args()
 
     output = args.output
-    if output is not None:
-        if output.endswith('.zip'):
-            output = output[0:-4]
-    else:
+    if output is None:
         # Get version information
         with open(os.path.join(args.source_dir, 'dat/VERSION'), 'r') as f:
             version = f.read().strip()
         output = f"naev-{version}-soundtrack"
 
+    elif output.endswith('.zip'):
+        output = output[:-4]
     print(f"Generating {output}.zip")
 
     generate_soundtrack( source_dir=args.source_dir, output=output, generate_csv=args.csv )

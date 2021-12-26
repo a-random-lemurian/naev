@@ -46,9 +46,9 @@ class items(readers):
             xmlFile = glob(xmlFile)
         readers.__init__(self, xmlFile, config['verbose'])
         self._unidiff = config['unidiffobj']
-        self.usedItem = list()
+        self.usedItem = []
 
-        self.itemNames = list()
+        self.itemNames = []
         print('Compiling {0} list ...'.format(config['item']),end='       ')
         try:
             if type(self.xmlData) is not type(list()):
@@ -93,7 +93,7 @@ class tech(items):
         items.__init__(self, **config)
         self.assets = assets(techItem=self.findItem, **config)
 
-        self.techItems = list()
+        self.techItems = []
         for item in self.xmlData.findall('tech/item'):
             if item.text not in self.techItems:
                 self.techItems.append(item.text)
@@ -102,10 +102,7 @@ class tech(items):
         self.assets.validateTechs(self.itemNames)
 
     def findItem(self, name):
-        if name in self.techItems or self._unidiff.findTech(name):
-            return True
-        else:
-            return False
+        return bool(name in self.techItems or self._unidiff.findTech(name))
 
 class assets(items):
     def __init__(self, techItem, **config):
@@ -119,7 +116,7 @@ class assets(items):
         self.ssys.validateAssets(self.itemNames)
 
     def validateTechs(self, techNames):
-        techList = list()
+        techList = []
         for techs in self.xmlData:
             techs = techs.getroot()
             for tech in techs.findall('tech/item'):
@@ -140,7 +137,7 @@ class ssys(readers):
 
     def validateAssets(self, assetNames):
         # TODO check for empty assets[/asset] <- return '\n  ' if empty
-        assetList = list()
+        assetList = []
         for assets in self.xmlData:
             for asset in assets.findall('ssys/assets/asset/'):
                 assetList.append(asset.text)

@@ -55,60 +55,52 @@ else:
 def add_notes( name, parent, base_campaign, campaigns_list, tiers_list ):
     notes = parent.find('notes')
 
-    if notes != None:
-        campaign = notes.find("campaign")
-        tier = notes.find("tier")
-    else:
+    if notes is None:
         campaign = None
         tier = None
 
-    if campaign == None:
-        campTxt = base_campaign
     else:
-        campTxt = campaign.text
-
-    if tier == None:
-        tierV = None
-    else:
-        tierV = int(tier.text)
-
+        campaign = notes.find("campaign")
+        tier = notes.find("tier")
+    campTxt = base_campaign if campaign is None else campaign.text
+    tierV = None if tier is None else int(tier.text)
     campTxt = 'cluster: '+campTxt
     campaigns_list.append(campTxt)
     tiers_list.append(tierV)
 
-    if notes == None:
+    if notes is None:
         return
 
     done_misn = notes.findall('done_misn')
     for dm in done_misn:
         previous = 'Misn: '+dm.attrib['name']
-        if dm.text == None:
+        if dm.text is None:
             dm.text = ""
         extra_links.append( (previous, name, dm.text)  )
 
     done_evt = notes.findall('done_evt')
     for dm in done_evt:
         previous = 'Evt: '+dm.attrib['name']
-        if dm.text == None:
+        if dm.text is None:
             dm.text = ""
         extra_links.append( (previous, name, dm.text)  )
 
     provides = notes.findall('provides')
     for p in provides:
         nextt = p.attrib['name']
-        if p.text == None:
+        if p.text is None:
             p.text = ""
         extra_links.append( (name, nextt, p.text)  )
-        if (not (nextt in meta_nodes)):
+        if nextt not in meta_nodes:
             meta_nodes.append((nextt,campTxt))
 
     requires = notes.findall('requires')
     for r in requires:
         previous = r.attrib['name']
-        if r.text == None:
+        if r.text is None:
             r.text = ""
         extra_links.append( (previous, name, r.text)  )
-        if (not (previous in meta_nodes)):
+        if previous not in meta_nodes:
             meta_nodes.append((previous,campTxt)) # TODO: there will be conflicts between differnent requires
 
 
@@ -137,7 +129,7 @@ for missionfile in glob.glob( prefix+'/dat/missions/**/*.lua', recursive=True ):
     dones.append(done)
 
     flags = misn.find('flags')
-    if flags == None:
+    if flags is None:
         uniques.append(False)
     else:
         unique = flags.find('unique')
@@ -180,11 +172,11 @@ for eventfile in glob.glob( prefix+'/dat/events/**/*.lua', recursive=True ):
     namdictE[name] = i
 
     flags = evt.find('flags')
-    if flags == None:
+    if flags is None:
         uniquesE.append(False)
     else:
         unique = flags.find('unique')
-        if unique == None:
+        if unique is None:
             uniquesE.append(False)
         else:
             uniquesE.append(True)
@@ -201,13 +193,11 @@ G=pgv.AGraph(directed=True)
 # Create the tier subgraphs
 imax = 0
 for v in tierL:
-    if v != None:
-        if v > imax:
-            imax = v
+    if v != None and v > imax:
+        imax = v
 for v in tierLE:
-    if v != None:
-        if v > imax:
-            imax = v
+    if v != None and v > imax:
+        imax = v
 
 if not ignore_tier:
     for i in range( imax+1 ):
@@ -268,7 +258,7 @@ for i in range(len(namesE)):
 
 for i in range(len(dones)):
     done = dones[i]
-    if done == None:
+    if done is None:
         continue
     name = names[i]
     G.add_edge('Misn: '+done.text,name)

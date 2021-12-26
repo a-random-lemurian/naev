@@ -21,10 +21,7 @@ def load_material(l):
     #return tuple( gammaToLinear(float(i)) for i in l)
 
 def load_normal(l):
-    n = load_vector(l)
-    return n
-    norm = math.sqrt( n[0]**2 + n[1]**2 + n[2]**2 )
-    return tuple(map( lambda x: x/norm, n ))
+    return load_vector(l)
 
 def base_path():
     return pathlib.Path(__file__).parents[3]
@@ -63,16 +60,12 @@ def parse_mtl(path):
             m = Material()
             materials[l[1]] = m
             cur_material = m
-        # Ambient
         elif l[0] == 'Ka':
             cur_material.Ka = load_material( l[1:4] )
-        # Diffuse
         elif l[0] == 'Kd':
             cur_material.Kd = load_material( l[1:4] )
-        # Specular
         elif l[0] == 'Ks':
             cur_material.Ks = load_material( l[1:4] )
-        # Emission
         elif l[0] == 'Ke':
             cur_material.Ke = load_material( l[1:4] )
         elif l[0] == 'Ns':
@@ -99,16 +92,10 @@ def parse_mtl(path):
         elif l[0] == 'map_Bump':
             # XXX handle s
             opts, rest = mtl_getopt(l[1:], {'s': 3, 'bm': 1})
-            if 'bm' in opts:
-               cur_material.bm = float(opts['bm'][0])
-            else:
-               cur_material.bm = 1.0
+            cur_material.bm = float(opts['bm'][0]) if 'bm' in opts else 1.0
             map_Bump = ' '.join(rest)
             cur_material.map_Bump = loadTexture(os.path.dirname(path) + '/' + map_Bump)
-        # Illumination mode
-        elif l[0] == 'illum':
-            pass
-        else:
+        elif l[0] != 'illum':
             print(f"Ignoring {l[0]}")
 
     return materials
@@ -133,13 +120,10 @@ def parse_obj(path):
         # Load materials from file
         if l[0] == 'mtllib':
             mtls = parse_mtl(os.path.dirname(path) + '/' + l[1])
-        # Use material
         elif l[0] == 'usemtl':
             cur_object.mtl_list.append([mtls[l[1]], len(cur_object.vertices) // 8, 0])
-        # Smoothing
         elif l[0] == 's':
             pass
-        # Face
         elif l[0] == 'f':
             for i in l[1:4]:
                 v, vt, vn = (int(j or 0) for j in i.split('/'))
@@ -150,23 +134,16 @@ def parse_obj(path):
                     cur_object.vertices.extend(vt_list[vt - 1])
                 cur_object.vertices.extend(vn_list[vn - 1])
             cur_object.mtl_list[-1][2] += 3
-        # Vertex
         elif l[0] == 'v':
             v_list.append(load_vector(l[1:4]))
-        # Texture vertex
         elif l[0] == 'vt':
             vt_list.append(load_vector(l[1:3]))
-        # Vertex normal
         elif l[0] == 'vn':
             vn_list.append(load_normal(l[1:4]))
-        # Object
         elif l[0] == 'o':
             cur_object = Object()
             objects[l[1]] = cur_object
-        # Ignore lines
-        elif l[0] == 'l':
-            pass
-        else:
+        elif l[0] != 'l':
             print(f"Ignoring {l[0]}")
 
     return objects

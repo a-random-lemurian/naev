@@ -38,15 +38,20 @@ class Presence:
 def readFactions(path):
     '''Returns a dictionary of Faction values by name. '''
     tree = ET.parse(path)
-    full = {}
-    for elem in tree.findall('faction'):
-        full[elem.findtext('name')] = Faction(
-            [Generator(gen.text, float(gen.attrib['weight'])) for gen in elem.findall('generator')],
+    full = {
+        elem.findtext('name'): Faction(
+            [
+                Generator(gen.text, float(gen.attrib['weight']))
+                for gen in elem.findall('generator')
+            ],
             bool(elem.find('invisible')),
             float(elem.findtext('lane_base_cost', 0)),
             float(elem.findtext('lane_length_per_presence', 0)),
             bool(elem.find('useshiddenjumps')),
         )
+        for elem in tree.findall('faction')
+    }
+
     return {n: f for n, f in full.items() if f.lane_length_per_presence and not f.invisible}
 
 def parse_pos(pos):
@@ -121,10 +126,9 @@ class Systems:
         self.presass = [] # List of presences in assets
         self.factass = [] # Factions in assets. (I'm sorry for all these asses)
 
-        i = 0 # No of system
         nglob = 0 # Global nb of nodes
         nasg = 0 # Global nb of assest
-        for fileName in sorted(os.listdir(path)):
+        for i, fileName in enumerate(sorted(os.listdir(path))):
             tree = ET.parse((path+fileName))
             root = tree.getroot()
 
@@ -141,7 +145,6 @@ class Systems:
             nodes = []
             loc2glob = []
             sysas = []
-            sysvas = []
             nass = 0
 
             for pnt in root.findall('assets/asset'):
@@ -162,9 +165,7 @@ class Systems:
                     nglob += 1
                     nass += 1
                     nasg += 1
-            for virt in root.findall('assets/asset_virtual'):
-                sysvas.append(virt.text)
-
+            sysvas = [virt.text for virt in root.findall('assets/asset_virtual')]
             presence = [Presence() for _ in factions]
             self.presences.append(presence)
             self.sysass.append(sysas)
@@ -207,8 +208,6 @@ class Systems:
             self.jp2locs.append(jp2loc)
             self.nodess.append(nodes)
             self.loc2globs.append(loc2glob)
-            i += 1
-
         nsys = len(self.sysnames)
         connect = np.zeros((nsys,nsys)) # Connectivity matrix for systems.
 

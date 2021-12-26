@@ -76,9 +76,11 @@ class harvester:
                 if details.tag in self.__tagsBlacklist:
                     continue
 
-                if details.tag in self.__tagsSortBase:
-                    if details.text not in self.shipSortBy[details.tag]:
-                        self.shipSortBy[details.tag][details.text] = []
+                if (
+                    details.tag in self.__tagsSortBase
+                    and details.text not in self.shipSortBy[details.tag]
+                ):
+                    self.shipSortBy[details.tag][details.text] = []
 
                 # seems empty, ignoring. <- perhaps not a good idea
                 if not details.text:
@@ -212,7 +214,7 @@ if __name__ == "__main__":
 
     date = str( datetime.utcnow().strftime("%c UTC") )
 
-    myLoader = FileSystemLoader(cfg.templates if cfg.templates else tplPath)
+    myLoader = FileSystemLoader(cfg.templates or tplPath)
     labels = yamlLabelReader(open('labels.yml', 'r'))
     env = Environment(loader=myLoader)
     env.filters['getStatsLabel'] = labels.getShipStatsLabels

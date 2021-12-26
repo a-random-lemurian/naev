@@ -30,8 +30,7 @@ if __name__ == "__main__":
    # Iterate over systems and planets
    ssys_added = []
    jumps_added = []
-   i = 1
-   for ssysName, planets in ssysObj.assetsList.items():
+   for i, (ssysName, planets) in enumerate(ssysObj.assetsList.items(), start=1):
 
       # Create jumps
       jumps = ssysObj.jumpgatesForSystem( ssysName )
@@ -57,9 +56,9 @@ if __name__ == "__main__":
 
       # We don't want all the planets
       planets_filtered = list(filter( planet_filter, planets ))
-      planets_added = list()
+      planets_added = []
       # Create cluster
-      if len(planets_filtered) > 0:
+      if planets_filtered:
          subg = pydot.Cluster( "sys_%d"%i, label=ssysName )
          # Iterate to create maps
          for p in planets_filtered:
@@ -82,8 +81,6 @@ if __name__ == "__main__":
             planets_added.append(p)
 
       ssys_added.append( ssysName )
-      i += 1
-
    #graph.set_prog( 'neato' )
    graph.set_simplify( False )
    graph.set( 'aspect',    1 )

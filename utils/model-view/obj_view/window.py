@@ -77,13 +77,13 @@ class Window:
             self.rot_z_dir = -1
 
     def keyboard_special_up(self, key, x, y):
-        if key == GLUT_KEY_LEFT or key == GLUT_KEY_RIGHT:
+        if key in [GLUT_KEY_LEFT, GLUT_KEY_RIGHT]:
             self.rot_dir = 0
-        elif key == GLUT_KEY_UP or key == GLUT_KEY_DOWN:
+        elif key in [GLUT_KEY_UP, GLUT_KEY_DOWN]:
             self.rot_z_dir = 0
 
     def keyboard_down_cb(self, key, x, y):
-        if key == b'\x1b' or key == b'q':
+        if key in [b'\x1b', b'q']:
             glutDestroyWindow(self.window)
         elif key == b'a':
             self.rot_dir = 1
